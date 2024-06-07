@@ -1,4 +1,4 @@
-#include "ObjectRecognition.h";
+#include "ObjectRecognition.h"
 
 /**
 * 
