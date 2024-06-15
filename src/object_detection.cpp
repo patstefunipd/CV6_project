@@ -31,7 +31,7 @@ std::vector<DetectedObject> BallDetector::detectBalls(const cv::Mat& image_frame
         int width = 2 * radius;
         int height = 2 * radius;
 
-        // Assuming all detected circles are balls, label them generically
+        
         DetectedObject detected_obj = {x, y, width, height, "ball"};
         detected_objects.push_back(detected_obj);
     }
