@@ -1,5 +1,7 @@
 #include "VideoHelpers.h"
 #include "ObjectRecognition.h"
+#include "Table2D.h"
+
 /*
 *  Template function that draws items (like lines and circles) in 
 *  an image
@@ -43,11 +45,15 @@ void DrawItems(vector<T> items, Mat &img, int itemType) {
 */
 void VideoHelpers::showVideo(string filename, VideoCapture cap, Mat frame) {
     namedWindow(filename, 1);
-    Mat greyMat;
+    Mat greyMat, table;
     Mat elaboratedFrame;
     vector<Vec2f> lines;
     vector<Vec3f> circles;
-    for (; ; )
+
+    // Create the table once
+    table = Table2D::creatTable();
+
+    for (;;)
     {
         cap >> frame;
         if (frame.empty())
@@ -57,8 +63,23 @@ void VideoHelpers::showVideo(string filename, VideoCapture cap, Mat frame) {
         GaussianBlur(greyMat, greyMat, Size(9, 9), 0);
         DrawItems(ObjectRecognition::detectPlayingField(greyMat), elaboratedFrame, 0);
         DrawItems(ObjectRecognition::detectBilliardBalls(greyMat), elaboratedFrame, 1);
-        imshow(filename, elaboratedFrame);
 
-        waitKey(20);
+        // Ensure table has the same type and number of rows as elaboratedFrame
+        if (table.rows != elaboratedFrame.rows) {
+            cv::resize(table, table, Size(table.cols, elaboratedFrame.rows));
+        }
+        if (table.type() != elaboratedFrame.type()) {
+            cv::cvtColor(table, table, COLOR_BGR2GRAY);
+            cv::cvtColor(table, table, COLOR_GRAY2BGR); 
+        }
+
+        // Concatenate table image and frame side by side
+        Mat combinedFrame;
+        hconcat(elaboratedFrame, table, combinedFrame);
+
+        imshow(filename, combinedFrame);
+
+        if (waitKey(20) >= 0)
+            break;  
     }
 }
