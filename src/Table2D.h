@@ -14,9 +14,10 @@ private:
 
 public:
 
-    static Mat creatTable(const Mat originalFrame , const vector<Point> cornerPoints);
+    static Mat creatTable(const Mat originalFrame , const std::vector<cv::Point> cornerPoints);
     static std::tuple<std::vector<Point>, Mat> detectBilliardTable(Mat& frame);
     static tuple<Scalar, Scalar> GetClothColor(const Mat& hsv, int search_width = 45);
+    static Mat TableMask(const Mat frame);
 
     class Indexer {
     public:

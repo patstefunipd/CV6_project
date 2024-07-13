@@ -6,51 +6,34 @@ int Table2D::width = 540;
 int Table2D::height = 560; 
 
 
-Mat Table2D::creatTable(const Mat originalFrame , const vector<Point> cornerPoints) {
-    // Create a new image with specified width, height, and 3 color channels
-    Mat img = Mat::zeros(height, width, CV_8UC3);
-
-    Point tl, tr, br, bl;
-    if (cornerPoints.size() == 4) {
-        tl = cornerPoints[0];
-        tr = cornerPoints[1];
-        bl = cornerPoints[2];
-        br = cornerPoints[3];
-    } else {
-        // Handle error: not enough points
-        cerr << "Error: cornerPoints vector does not contain exactly 4 points." << endl;
-        return img;
-    }
-    
-    // Set the background color
-    img.setTo(Scalar(10, 180, 0)); // BGR color
-
-    // Draw the filled rectangle representing the table area
-    rectangle(img, Point(0, height / 5), Point(width, height), Scalar(10, 180, 0), FILLED);
-
-    // Convert the image to RGB color space
-    cvtColor(img, img, COLOR_BGR2RGB);
-
-    // Crop and overlay the original frame onto the table area
-    if (!originalFrame.empty()) {
-        // Create a mask for the table area
-        Mat mask = Mat::zeros(originalFrame.size(), CV_8UC1);
-        vector<Point> tableContour = {tl, tr, br, bl}; // Using the instance-specific corners
-        vector<vector<Point>> drawContoursVec = {tableContour};
-        drawContours(mask, drawContoursVec, -1, Scalar(255), FILLED);
-
-        // Apply the mask to extract the table region from the original frame
-        Mat tableRegion;
-        originalFrame.copyTo(tableRegion, mask);
-
-        // Resize the table region to fit into the table image
-        resize(tableRegion, tableRegion, Size(width, height));
-
-        // Overlay the table region onto the table image
-        tableRegion.copyTo(img(Rect(0, 0, tableRegion.cols, tableRegion.rows)));
+Mat Table2D::creatTable(const Mat originalFrame , const std::vector<cv::Point> cornerPoints) {
+    // Ensure cornerPoints contains exactly 4 points
+    if (cornerPoints.size() != 4) {
+        throw std::invalid_argument("cornerPoints must contain exactly 4 points.");
     }
 
-    return img;
+    // Convert cornerPoints from cv::Point to cv::Point2f
+    std::vector<cv::Point2f> pts1;
+    for (const auto &point : cornerPoints) {
+        pts1.emplace_back(static_cast<float>(point.x), static_cast<float>(point.y));
+    }
+
+    // Define the points of the output image
+    std::vector<cv::Point2f> pts2 = {
+        cv::Point2f(0.0f, 0.0f),
+        cv::Point2f(static_cast<float>(width), 0.0f),
+        cv::Point2f(0.0f, static_cast<float>(height)),
+        cv::Point2f(static_cast<float>(width), static_cast<float>(height))
+    };
+
+    // Getting perspective transform matrix by 4 points of each image
+    cv::Mat matrix = cv::getPerspectiveTransform(pts1, pts2);
+
+    // Applying perspective warp
+    cv::Mat transformed;
+    cv::warpPerspective(originalFrame, transformed, matrix, cv::Size(width, height));
+
+    return transformed;
 }
 
 
@@ -65,7 +48,7 @@ std::tuple<std::vector<Point>, Mat> Table2D::detectBilliardTable(Mat& frame) {
 
     // Compute the hue bounds dynamically
     Scalar lower_bound, upper_bound;
-    tie(lower_bound, upper_bound) = GetClothColor(hsv, 10); // Using hue range of 10
+    tie(lower_bound, upper_bound) = GetClothColor(hsv, 10); 
 
     // Create a mask for the dominant hue
     Mat mask;
@@ -114,10 +97,10 @@ std::tuple<std::vector<Point>, Mat> Table2D::detectBilliardTable(Mat& frame) {
         Point bl = Point(boundingBox.x, boundingBox.y + boundingBox.height); // Bottom-left corner
 
         // Print or use the corner points as needed
-        cout << "Top-left: " << tl << endl;
-        cout << "Top-right: " << tr << endl;
-        cout << "Bottom-left: " << bl << endl;
-        cout << "Bottom-right: " << br << endl;
+        // cout << "Top-left: " << tl << endl;
+        // cout << "Top-right: " << tr << endl;
+        // cout << "Bottom-left: " << bl << endl;
+        // cout << "Bottom-right: " << br << endl;
 
         // Store corner points in the vector
         cornerPoints.push_back(tl);
@@ -163,4 +146,37 @@ std::tuple<cv::Scalar, cv::Scalar> Table2D::GetClothColor(const cv::Mat& hsv, in
     cv::Scalar upper_color(h_max + search_width, s_max + search_width, v_max + search_width);
 
     return std::make_tuple(lower_color, upper_color);
+}
+
+
+Mat Table2D::TableMask(const Mat frame) {
+
+    Mat hsv;
+    cvtColor(frame, hsv, COLOR_BGR2HSV);
+
+    GaussianBlur(hsv, hsv, Size(7, 7), 2, 2);
+
+    Scalar lower_bound, upper_bound;
+    tie(lower_bound, upper_bound) = GetClothColor(hsv, 10); 
+
+    Mat mask;
+    inRange(hsv, lower_bound, upper_bound, mask);
+
+
+    Mat kernel = Mat::ones(Size(5, 5), CV_8U);
+    Mat mask_closing;
+    morphologyEx(mask, mask_closing, MORPH_CLOSE, kernel);
+
+    Mat mask_inv;
+    threshold(mask_closing, mask_inv, 5, 255, THRESH_BINARY_INV);
+
+    Mat masked_img;
+    bitwise_and(frame, frame, masked_img, mask_inv);
+
+
+    imshow("Table Mask", mask_closing);
+    imshow("Masked Objects", masked_img);
+    
+
+    return mask_inv;
 }
