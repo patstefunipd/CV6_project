@@ -77,10 +77,16 @@ void VideoHelpers::showVideo(std::string filename, cv::VideoCapture cap, cv::Mat
 
 
         //--------------------------------
-        Mat ak = Table2D::detectBilliardTable(elaboratedFrame);
+        vector<Point> corners;
+        Mat output;
+        tie(corners, output) = Table2D::detectBilliardTable(elaboratedFrame);
+        
 
+        // Mat combinedFrame;
+        table = Table2D::creatTable(elaboratedFrame, corners);
+        // cv::hconcat(elaboratedFrame, table, combinedFrame);
 
-        imshow(filename, ak);
+        imshow("Detected Billiard Table", table);
         //--------------------------------
 
         // Concatenate table image and frame side by side
