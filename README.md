@@ -4,17 +4,17 @@ This project is a computer vision system for analyzing video footage of "Eight B
 
 **ToDo:**
 
-1.Recognizes and localizes all balls on the playing field.
+1.Recognizing and localizing all balls on the playing field.
 
-2.Distinguishes balls based on their category (cue ball, 8-ball, solid colors, stripes).
+2.Distinguishing balls based on their category (cue ball, 8-ball, solid colors, stripes).
 
-3.Detects the boundaries of the playing field.
+3.Detecting the boundaries of the playing field.
 
-4.Segments the playing field and the balls.
+4.Segmenting the playing field and the balls.
 
-5.Provides a 2D top-view visualization of the current game state.
+5.Providing a 2D top-view visualization of the current game state.
 
-6.Tracks the trajectories of the balls after a shot.
+6.Tracking the trajectories of the balls after a shot.
 
 **How to run**
 ```
