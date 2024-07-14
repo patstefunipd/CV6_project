@@ -7,7 +7,7 @@ using namespace cv;
 class ObjectRecognition
 {
 	public:
-		static vector<Vec2f> detectPlayingField(Mat greyMat);
+		static Vec3f         getBallsClass(Mat mat, int radius, Point center);
 		static vector<Vec3f> detectBilliardBalls(Mat frame);
 };
 

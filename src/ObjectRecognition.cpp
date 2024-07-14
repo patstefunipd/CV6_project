@@ -1,14 +1,43 @@
 #include "ObjectRecognition.h"
 
-/**
-* 
-*/
-vector<Vec2f> ObjectRecognition::detectPlayingField(Mat greyMat) {
-	Mat canny;
-	Canny(greyMat, canny, 70, 200, 3);
-	vector<Vec2f> lines;
-	HoughLines(canny, lines, 1, CV_PI / 180, 150, 0, 0);
-	return lines;
+Vec3f ObjectRecognition::getBallsClass(Mat img, int radius, Point center) {
+	Vec3b currRGB;
+	int countBlackPixels     = 0;
+	int countWhitePixels     = 0;
+	int countWhiteInColoured = 0;
+	int countColouredPixels  = 0;
+
+	for (int i = center.y - radius; i < center.y + radius; i++) {
+		for (int j = center.x - radius; j < center.x + radius; j++) {
+			if (i >= 0 && i < img.rows && j >= 0 && j < img.cols) {
+				currRGB = img.at<Vec3b>(i, j);
+				if (currRGB[0] < 50 && currRGB[1] < 50 && currRGB[2] < 50) {
+					countBlackPixels++;
+				}
+				else if (currRGB[0] < 90 || currRGB[1] < 90 || currRGB[2] < 90) {
+					countColouredPixels++;
+					//img.at<Vec3b>(i, j) = Vec3b(0, 0, 0);
+				}
+				else {
+					countWhitePixels++;
+					//img.at<Vec3b>(i, j) = Vec3b(255, 255, 255);
+				}
+			}
+		}
+	}
+	//imshow("Threshold", img);
+	//waitKey();
+	if (countBlackPixels > 30) {
+		return Vec3b(0, 0, 0);
+	}
+	if (countWhitePixels > countColouredPixels && countWhitePixels > 120) {
+		return Vec3b(255, 255, 255);
+	}
+	//is striped
+	if (countWhitePixels > 30) {
+		return Vec3b(255, 0, 0);
+	}
+	return Vec3b(0,0,255);
 }
 
 /**
@@ -18,14 +47,6 @@ vector<Vec2f> ObjectRecognition::detectPlayingField(Mat greyMat) {
  * 
 */
 vector<Vec3f> ObjectRecognition::detectBilliardBalls(Mat greyMat) {
-	Mat canny;
-	//for (int i = 0; i <= 100; i += 10) {
-	//	for (int j = 0; j <= 100; j += 10) {
-	//		Canny(greyMat, canny, i, j);
-	//		imshow("canny " + to_string(i) + "," + to_string(j), canny);
-	//		waitKey(0);
-	//	}
-	//}
 	vector<Vec3f> circles;
 	HoughCircles(greyMat, circles, HOUGH_GRADIENT, 1, 10, 14, 15.5, 5, 12);
 	return circles;

@@ -30,7 +30,9 @@ void DrawItems(vector<T> items, cv::Mat &img, int itemType) {
             {
                 cv::Point center = cv::Point(items[i][0], items[i][1]);
                 int radius = items[i][2];
-                cv::circle(img, center, radius, cv::Scalar(255, 0, 255), 3, cv::LINE_AA);
+                Vec3b color = ObjectRecognition::getBallsClass(img, radius, center);
+                if(center.y - radius >= 0 && center.y + radius < img.rows && center.x - radius >= 0 && center.x + radius < img.cols)
+                    cv::circle(img, center, radius, color, 3, cv::LINE_AA);
             }
             break;
         }
@@ -54,12 +56,12 @@ void VideoHelpers::showVideo(std::string filename, cv::VideoCapture cap, cv::Mat
         if (frame.empty())
             break;
         elaboratedFrame = frame.clone();
-        cv::imshow(filename, elaboratedFrame);
-        cv::waitKey(1);
         cv::cvtColor(frame, greyMat, cv::COLOR_BGR2GRAY);
-        cv::GaussianBlur(greyMat, greyMat, cv::Size(9, 9), 0);
+        medianBlur(greyMat, greyMat, 3);
         // DrawItems(ObjectRecognition::detectPlayingField(greyMat), elaboratedFrame, 0);
-        // DrawItems(ObjectRecognition::detectBilliardBalls(greyMat), elaboratedFrame, 1);
+         DrawItems(ObjectRecognition::detectBilliardBalls(greyMat), elaboratedFrame, 1);
+         imshow("Image", elaboratedFrame);
+         waitKey();
         
         // Ensure table is initialized and has the same type and number of rows as elaboratedFrame
         if (table.empty()) {
