@@ -10,31 +10,36 @@ Vec3f ObjectRecognition::getBallsClass(Mat img, int radius, Point center) {
 	for (int i = center.y - radius; i < center.y + radius; i++) {
 		for (int j = center.x - radius; j < center.x + radius; j++) {
 			if (i >= 0 && i < img.rows && j >= 0 && j < img.cols) {
-				currRGB = img.at<Vec3b>(i, j);
-				if (currRGB[0] < 50 && currRGB[1] < 50 && currRGB[2] < 50) {
-					countBlackPixels++;
-				}
-				else if (currRGB[0] < 90 || currRGB[1] < 90 || currRGB[2] < 90) {
-					countColouredPixels++;
-					//img.at<Vec3b>(i, j) = Vec3b(0, 0, 0);
-				}
-				else {
-					countWhitePixels++;
-					//img.at<Vec3b>(i, j) = Vec3b(255, 255, 255);
-				}
+					currRGB = img.at<Vec3b>(i, j);
+					if (currRGB[0] < 40 && currRGB[1] < 40 && currRGB[2] < 40) {
+						countBlackPixels++;
+					}
+					else if (currRGB[0] < 90 || currRGB[1] < 90 || currRGB[2] < 90) {
+						countColouredPixels++;
+						//img.at<Vec3b>(i, j) = Vec3b(0, 0, 0);
+					}
+					else {
+						countWhitePixels++;
+						//img.at<Vec3b>(i, j) = Vec3b(255, 255, 255);
+					}
 			}
 		}
 	}
 	//imshow("Threshold", img);
 	//waitKey();
-	if (countBlackPixels > 30) {
+
+	countBlackPixels /= radius ^ 2;
+	countWhitePixels /= radius ^ 2;
+	countColouredPixels /= radius ^ 2;
+
+	if (countBlackPixels > 2) {
 		return Vec3b(0, 0, 0);
 	}
-	if (countWhitePixels > countColouredPixels && countWhitePixels > 120) {
+	if (countWhitePixels > countColouredPixels && countWhitePixels > 30) {
 		return Vec3b(255, 255, 255);
 	}
 	//is striped
-	if (countWhitePixels > 30) {
+	if (countWhitePixels > 4) {
 		return Vec3b(255, 0, 0);
 	}
 	return Vec3b(0,0,255);
@@ -48,6 +53,10 @@ Vec3f ObjectRecognition::getBallsClass(Mat img, int radius, Point center) {
 */
 vector<Vec3f> ObjectRecognition::detectBilliardBalls(Mat greyMat) {
 	vector<Vec3f> circles;
-	HoughCircles(greyMat, circles, HOUGH_GRADIENT, 1, 10, 14, 15.5, 5, 12);
+	Mat canny;
+	//Canny(greyMat, canny, 80, 40);
+	//imshow("canny", canny);
+	//waitKey();
+	HoughCircles(greyMat, circles, HOUGH_GRADIENT, 0.9, 12, 14, 15.2, 5, 21);
 	return circles;
 }

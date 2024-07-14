@@ -10,7 +10,7 @@
 *    1 : circles
 */
 template <class T>
-void DrawItems(vector<T> items, cv::Mat &img, int itemType) {
+void DrawItems(vector<T> items, cv::Mat &img, int itemType, vector<Point> corners) {
     for (size_t i = 0; i < items.size(); i++) {
         switch (itemType) {
             case 0:
@@ -31,8 +31,28 @@ void DrawItems(vector<T> items, cv::Mat &img, int itemType) {
                 cv::Point center = cv::Point(items[i][0], items[i][1]);
                 int radius = items[i][2];
                 Vec3b color = ObjectRecognition::getBallsClass(img, radius, center);
-                if(center.y - radius >= 0 && center.y + radius < img.rows && center.x - radius >= 0 && center.x + radius < img.cols)
-                    cv::circle(img, center, radius, color, 3, cv::LINE_AA);
+                if (center.y - radius >= 0 && center.y + radius < img.rows && center.x - radius >= 0 && center.x + radius < img.cols) {
+                    if (center.y - radius > corners[0].y && center.x + radius > corners[0].x &&
+                        center.y - radius < corners[3].y && center.x + radius < corners[3].x) {
+                            //accurate circle detection
+                            Mat checkForCircle;
+                            img(Rect(Point(center.x - radius - 5, center.y - radius - 5), Point(center.x + radius + 5, center.y + radius + 5))).copyTo(checkForCircle);
+                            cv::cvtColor(checkForCircle, checkForCircle, cv::COLOR_BGR2GRAY);
+                            vector<Vec3f> circles;
+                            int maxRadius = radius - 5;
+                            //medianBlur(greyMat, greyMat, 7);
+
+                           GaussianBlur(checkForCircle, checkForCircle, Size(3, 3), 0);
+                           /* Canny(checkForCircle, checkForCircle, 80, 40);*/
+                       /*     imshow("canny", checkForCircle);
+                            waitKey();*/
+                            HoughCircles(checkForCircle, circles, HOUGH_GRADIENT, 1, 10, 14, 14, 5, 25);
+                            if (circles.size() > 0)
+                            {
+                                cv::rectangle(img, Point(center.x - radius, center.y - radius), Point(center.x + radius, center.y + radius), color, 2, cv::LINE_AA);
+                            }
+                    }
+                }
             }
             break;
         }
@@ -58,10 +78,8 @@ void VideoHelpers::showVideo(std::string filename, cv::VideoCapture cap, cv::Mat
         elaboratedFrame = frame.clone();
         cv::cvtColor(frame, greyMat, cv::COLOR_BGR2GRAY);
         medianBlur(greyMat, greyMat, 3);
+        //GaussianBlur(greyMat, greyMat, Size(3, 3), 0);
         // DrawItems(ObjectRecognition::detectPlayingField(greyMat), elaboratedFrame, 0);
-         DrawItems(ObjectRecognition::detectBilliardBalls(greyMat), elaboratedFrame, 1);
-         imshow("Image", elaboratedFrame);
-         waitKey();
         
         // Ensure table is initialized and has the same type and number of rows as elaboratedFrame
         if (table.empty()) {
@@ -86,6 +104,9 @@ void VideoHelpers::showVideo(std::string filename, cv::VideoCapture cap, cv::Mat
 
         // Mat combinedFrame;
         table = Table2D::creatTable(elaboratedFrame, corners);
+        DrawItems(ObjectRecognition::detectBilliardBalls(greyMat), elaboratedFrame, 1, corners);
+        imshow("Image", elaboratedFrame);
+        waitKey();
         // cv::hconcat(elaboratedFrame, table, combinedFrame);
 
         imshow("Detected Billiard Table", table);
