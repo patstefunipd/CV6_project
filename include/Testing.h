@@ -10,7 +10,7 @@ class Testing
 {
 	public:
 		static vector<vector<int>> importTestData(string filename);
-		static void computeMeanAvaragePrecision(vector<vector<int>> dataset1, vector<vector<int>> dataset2, Mat img);
-		static void computeMeanIntersectionOverUnion();
+		static void computeMeanAvaragePrecision(vector<vector<int>> dataset1, vector<vector<int>> dataset2);
+		static void computeMeanIntersectionOverUnion(Mat maskOut, Mat maskTrain);
 };
 

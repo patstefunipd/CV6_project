@@ -1,5 +1,5 @@
 #include "Table2D.h"
-
+#include "Balls.h"
 
 // Initialize static members
 int Table2D::width = 540; 
@@ -16,6 +16,7 @@ Mat Table2D::creatTable(const Mat originalFrame , const std::vector<cv::Point> c
     std::vector<cv::Point2f> pts1;
     for (const auto &point : cornerPoints) {
         pts1.emplace_back(static_cast<float>(point.x), static_cast<float>(point.y));
+        circle(originalFrame, Point(point.x, point.y), 10, Scalar(0,0,255), 2);
     }
 
     // Define the points of the output image
@@ -108,7 +109,6 @@ std::tuple<std::vector<Point>, Mat> Table2D::detectBilliardTable(Mat& frame) {
         cornerPoints.push_back(bl);
         cornerPoints.push_back(br);        
     }
-
     return make_tuple(cornerPoints, output);
 
 
@@ -157,7 +157,7 @@ Mat Table2D::TableMask(const Mat frame) {
     GaussianBlur(hsv, hsv, Size(7, 7), 2, 2);
 
     Scalar lower_bound, upper_bound;
-    tie(lower_bound, upper_bound) = GetClothColor(hsv, 10); 
+    tie(lower_bound, upper_bound) = GetClothColor(hsv, 30); 
 
     Mat mask;
     inRange(hsv, lower_bound, upper_bound, mask);
@@ -173,10 +173,14 @@ Mat Table2D::TableMask(const Mat frame) {
     Mat masked_img;
     bitwise_and(frame, frame, masked_img, mask_inv);
 
+    //morphologyEx(mask_inv, mask_inv, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)));
+    //erode(mask_inv, mask_inv, getStructuringElement(MORPH_ELLIPSE, Size(7,7)), Point(-1, -1), 1, 1, 1);
+    //Mat kernel2 = Mat::ones(Size(13, 13), CV_8U);
+    //dilate(mask_inv, mask_inv, kernel);
 
-    imshow("Table Mask", mask_closing);
-    imshow("Masked Objects", masked_img);
-    
+
+    //imshow("Table Mask", mask_closing);
+    //imshow("Masked Objects", masked_img);
 
     return mask_inv;
 }

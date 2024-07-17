@@ -8,3 +8,7 @@ OpenCVProject.vcxproj.filters
 OpenCVProject.vcxproj.user
 x64
 .vs
+test
+.gitignore
+img
+videos

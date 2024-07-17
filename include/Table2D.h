@@ -1,13 +1,14 @@
 #pragma once
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include <typeinfo>
 using namespace std;
 using namespace cv;
 
-class VideoHelpers
-{
+class Table2D
+{	
+	private:
+        static int width;
+        static int height;
 	public:
-		static void showVideo(VideoCapture cap);
+		static Mat creatTable();
 };
-
