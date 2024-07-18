@@ -9,6 +9,6 @@ class FrameProcessing
 		static Mat blurImage(Mat img);
 		static Mat projectTable(Mat img, Mat blurred, vector<Point> corners);
 		static vector<vector<int>> processBalls(Mat img, Mat blurred, Mat mask3d, vector<Point> corners);
-		static tuple<vector<vector<int>>, Mat> processFrame(Mat img);
+		static tuple<vector<vector<int>>, Mat, Mat, Mat> processFrame(Mat img);
 };
 

@@ -6,6 +6,6 @@ using namespace std;
 class BallTracker
 {
 	public:
-		static bool trackBall(Mat prevFrame, Mat greyMat, Mat flow, Ptr<DISOpticalFlow> disOpticalFlow, Mat &img, vector<Vec3f> circles);
+		static bool trackBall(Mat prevFrame, Mat greyMat, Mat flow, Ptr<DISOpticalFlow> disOpticalFlow, Mat &img, vector<vector<int>> circles);
 };
 

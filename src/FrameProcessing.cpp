@@ -56,7 +56,7 @@ vector<vector<int>> FrameProcessing::processBalls(Mat img, Mat blurred, Mat mask
     return outputData;
 }
 
-tuple<vector<vector<int>>, Mat> FrameProcessing::processFrame(Mat img) {
+tuple<vector<vector<int>>, Mat, Mat, Mat> FrameProcessing::processFrame(Mat img) {
     vector<Point> corners;
     Mat output;
     Mat blurred = blurImage(img);
@@ -65,5 +65,5 @@ tuple<vector<vector<int>>, Mat> FrameProcessing::processFrame(Mat img) {
     Mat mask3d = Table2D::TableMask(blurred);
     vector<vector<int>> balls = processBalls(img, blurred, mask3d, corners);
     Mat segmentMask = Segmentation::segmentImg(mask3d, balls);
-    return make_tuple(balls, segmentMask);
+    return make_tuple(balls, segmentMask, mask3d, proj2d);
 }

@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
     if (argc > 0) filename = argv[1];
 
     //PROCESSING PART
-    //VideoHelpers::showVideo(filename);
+    VideoHelpers::showVideo(filename);
 
     //TESTING PART
     string path = "test/game";
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     string firstSegMask = "masks/frame_first.png";
     string lastSegMask = "masks/frame_last.png";
     vector<vector<int>> outputData, testData;
-    Mat outputSegMask, testSegMask;
+    Mat outputSegMask, testSegMask, mask3d, mask2d;
     Mat testImg = Mat::zeros(Size(5, 5), CV_8UC3);
     for (int game = 1; game < 4 ; game++) {
         for (int clip = 1; clip < 4; clip++) {
@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
             cout << endl << filenametest << " first" << endl;
             testImg = imread(filenametest + firstFramePath);
             testData = Testing::importTestData(filenametest + firstBboxPath);
-            tie(outputData, outputSegMask) = FrameProcessing::processFrame(testImg);
+            tie(outputData, outputSegMask, mask3d, mask2d) = FrameProcessing::processFrame(testImg);
             Testing::computeMeanAvaragePrecision(outputData, testData);
             testSegMask = imread(filenametest + firstSegMask);
             //Testing::computeMeanIntersectionOverUnion(testImg, outputSegMask);
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
             cout << endl << filenametest << " last" << endl;
             testData = Testing::importTestData(filenametest + lastBboxPath);
             testImg = imread(filenametest + lastFramePath);
-            tie(outputData, outputSegMask) = FrameProcessing::processFrame(testImg);
+            tie(outputData, outputSegMask, mask3d, mask2d) = FrameProcessing::processFrame(testImg);
             Testing::computeMeanAvaragePrecision(outputData, testData);
             testSegMask = imread(filenametest + lastSegMask);
             //Testing::computeMeanIntersectionOverUnion(outputSegMask, outputSegMask);
