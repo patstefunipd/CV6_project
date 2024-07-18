@@ -8,6 +8,6 @@ using namespace cv;
 class VideoHelpers
 {
 	public:
-		static void showVideo(string filename);
+		static void processVideo(string filename);
 };
 

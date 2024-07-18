@@ -29,6 +29,10 @@ vector<vector<int>> Testing::importTestData(string filename) {
 	return data;
 }
 
+void exportTestData(string data) {
+	//TODO
+}
+
 vector<tuple<Point, float>> ioU(vector<vector<int>> dataset1, vector<vector<int>> dataset2) {
 	vector<tuple<Point, float>> iouData;
 	Point rectPoint;
@@ -107,6 +111,7 @@ void Testing::computeMeanAvaragePrecision(vector<vector<int>> dataset1, vector<v
 }
 
 void Testing::computeMeanIntersectionOverUnion(Mat mask1, Mat mask2) {
+	//TODO
 	vector<int>intersArea = {0, 0, 0, 0, 0, 0};
 	vector<int>unionArea = { 0, 0, 0, 0, 0, 0 };
 	vector<float> iou;

@@ -3,6 +3,7 @@
 #include "Balls.h"
 #include "Testing.h"
 #include "Segmentation.h"
+#include "MiniMap.h"
 
 Mat FrameProcessing::blurImage(Mat img) {
     Mat blurred = img.clone();
@@ -19,18 +20,20 @@ Mat FrameProcessing::blurImage(Mat img) {
     return blurred;
 }
 
-Mat FrameProcessing::projectTable(Mat img, Mat blurred, vector<Point> corners){
-    Mat output, table;
+tuple<Mat, Mat, Mat, int, int> FrameProcessing::projectTable(Mat img, Mat blurred, vector<Point> corners){
+    Mat output, table, projectionMatrix;
     Mat elaboratedFrame = img.clone();
+    int width, height;
     // Ensure table is initialized and has the same type and number of rows as elaboratedFrame
-    table = Table2D::creatTable(elaboratedFrame, corners);
+    tie(width, height) = Table2D::CalculateWidthHeight(corners);
+    tie(table, projectionMatrix) = Table2D::creatTable(elaboratedFrame, corners, width, height);
     if (table.empty()) {
         table = cv::Mat::zeros(elaboratedFrame.size(), elaboratedFrame.type());
     }
 
-    if (table.rows != elaboratedFrame.rows) {
-        cv::resize(table, table, cv::Size(table.cols, elaboratedFrame.rows));
-    }
+    //if (table.rows != elaboratedFrame.rows) {
+    //    cv::resize(table, table, cv::Size(table.cols, elaboratedFrame.rows));
+    //}
 
     if (table.type() != elaboratedFrame.type()) {
         cv::cvtColor(table, table, cv::COLOR_BGR2GRAY);
@@ -46,7 +49,7 @@ Mat FrameProcessing::projectTable(Mat img, Mat blurred, vector<Point> corners){
 
 /*    imshow("Detected Billiard Table", mask2d);
     waitKey();*/
-    return mask2d;
+    return make_tuple(mask2d, projectionMatrix, table, width, height);
 }
 
 vector<vector<int>> FrameProcessing::processBalls(Mat img, Mat blurred, Mat mask3d, vector<Point> corners) {
@@ -58,12 +61,14 @@ vector<vector<int>> FrameProcessing::processBalls(Mat img, Mat blurred, Mat mask
 
 tuple<vector<vector<int>>, Mat, Mat, Mat> FrameProcessing::processFrame(Mat img) {
     vector<Point> corners;
-    Mat output;
+    Mat projMatrix, proj2d, output, topView;
+    int width, height;
     Mat blurred = blurImage(img);
     tie(corners, output) = Table2D::detectBilliardTable(img);
-    Mat proj2d  = projectTable(img, blurred, corners);
+    tie(proj2d, projMatrix, topView, width, height) = projectTable(img, blurred, corners);
     Mat mask3d = Table2D::TableMask(blurred);
     vector<vector<int>> balls = processBalls(img, blurred, mask3d, corners);
+    proj2d = MiniMap::buildMiniMap(img, projMatrix, balls, width, height);
     Mat segmentMask = Segmentation::segmentImg(mask3d, balls);
     return make_tuple(balls, segmentMask, mask3d, proj2d);
 }

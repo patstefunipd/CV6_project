@@ -1,25 +1,24 @@
 #include "Balls.h"
 #include "Table2D.h"
 
-void projectBalls(vector<Vec3f> circles) {
-	// Define the points of the output image
-	//std::vector<cv::Point2f> pts2 = {
-	//	cv::Point2f(0.0f, 0.0f),
-	//	cv::Point2f(static_cast<float>(540), 0.0f),
-	//	cv::Point2f(0.0f, static_cast<float>(560)),
-	//	cv::Point2f(static_cast<float>(540), static_cast<float>(560))
-	//};
-	//Mat output(Size(540, 560), CV_8UC3, Scalar(0,255,0));
-	//Point2f points;
-	//for (int i = 0; i < circles.size(); i++) {;
 
-	//	// Getting perspective transform matrix by 4 points of each image
-	//	cv::Mat matrix = cv::getPerspectiveTransform(pts1, pts2);
-
-	//	// Applying perspective warp
-	//	cv::Mat transformed;
-	//	cv::warpPerspective(output, transformed, matrix, cv::Size(width, height));
-	//}
+Vec3f Balls::getColorClass(int categoryId) {
+	Vec3f color;
+	switch (categoryId) {
+	case 1:
+		color = Vec3f(255, 255, 255);
+		break;
+	case 2:
+		color = Vec3f(0, 0, 0);
+		break;
+	case 3:
+		color = Vec3f(0, 0, 255);
+		break;
+	case 4:
+		color = Vec3f(255, 0, 0);
+		break;
+	}
+	return color;
 }
 
 
@@ -63,7 +62,7 @@ int Balls::getBallsClass(Mat img, int radius, Point center) {
 	countColouredPixels /= radius ^ 2;
 	countWhitePixels /= radius ^ 2;
 
-	if (countBlackPixels > 4) {
+	if (countBlackPixels > 3) {
 		return 2;
 	}
 	if (countWhitePixels > 10) {
@@ -96,7 +95,7 @@ int Balls::getBallsClass(Mat img, int radius, Point center) {
 	countWhitePixels /= radius ^ 2;
 
 	//is striped
-	if (countWhitePixels > 2 && countColouredPixels < 50) {
+	if (countWhitePixels > 2 && countColouredPixels < 40) {
 		return 4;
 	}
 	return 3;
@@ -126,21 +125,8 @@ vector<vector<int>> Balls::drawBalls(Mat& img, vector<Vec3f> circles, vector<Poi
             cv::Point center = cv::Point(circles[i][0], circles[i][1]);
             int radius = circles[i][2];
             int categoryId = getBallsClass(blurred, radius, center);
-			Vec3f color;
-			switch (categoryId) {
-				case 1: 
-					color = Vec3f(255, 255, 255);
-					break;
-				case 2:
-					color = Vec3f(0, 0, 0);
-					break;
-				case 3:
-					color = Vec3f(0, 0, 255);
-					break;
-				case 4:
-					color = Vec3f(255, 0, 0);
-					break;
-			}
+			Vec3f color = getColorClass(categoryId);
+			
         /*    if (center.y - radius >= 0 && center.y + radius < img.rows && center.x - radius >= 0 && center.x + radius < img.cols) {
                 if (center.y - radius > corners[0].y && center.x + radius > corners[0].x &&
                     center.y - radius < corners[3].y && center.x + radius < corners[3].x) {*/

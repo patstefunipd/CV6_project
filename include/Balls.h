@@ -7,10 +7,11 @@ using namespace cv;
 class Balls
 {
 	public:
-		static vector<Vec3f> detectBilliardBalls(Mat frame);
-		static vector<vector<int>> drawBalls(Mat& originalImg, vector<Vec3f> circles, vector<Point> corners, Mat blurred);
+		static vector<Vec3f> detectBilliardBalls(cv::Mat frame);
+		static vector<vector<int>> drawBalls(cv::Mat& originalImg, vector<Vec3f> circles, vector<Point> corners, cv::Mat blurred);
+		static Vec3f getColorClass(int ballClass);
 	private: 
-		static int getBallsClass(Mat mat, int radius, Point center);
+		static int getBallsClass(cv::Mat mat, int radius, Point center);
 
 };
 
