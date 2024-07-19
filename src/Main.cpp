@@ -1,6 +1,3 @@
-#include <opencv2/opencv.hpp>
-#include <iostream>
-#include "VideoHelpers.h"
 #include "FrameProcessing.h"
 #include "Testing.h"
 #include "Segmentation.h"
@@ -36,7 +33,42 @@ int main(int argc, char* argv[])
             VideoCapture capture("test/" + filenametest + "/" + filenametest + ".mp4");
             if (!capture.isOpened())
                 throw "Error in opening video";
-            VideoHelpers::processVideo(capture, game, clip);
+            //TO WRITE VIDEO
+            VideoWriter outputVideo;
+
+            //TO COMPUTE TRAJECTORIES
+            Ptr<DISOpticalFlow> disOpticalFlow = DISOpticalFlow::create();
+
+            Mat prevFrame, flow, mask3d, frame, elaboratedFrame, miniMap;
+            int countFrame = 0;
+            cv::Mat segmentMask;
+            vector<vector<int>> balls;
+            bool sizeChosen = false;
+            for (;;) {
+                capture >> frame;
+                if (frame.empty())
+                    break;
+                elaboratedFrame = frame.clone();
+                tie(balls, segmentMask, mask3d, miniMap) = FrameProcessing::processFrame(elaboratedFrame);
+                if (!sizeChosen) {
+                    std::string filename = "game" + to_string(game) + "_clip" + to_string(clip) + ".avi";
+                    outputVideo.open(filename, VideoWriter::fourcc('M', 'J', 'P', 'G'), capture.get(CAP_PROP_FPS), Size(miniMap.cols, miniMap.rows), true);
+                    if (!outputVideo.isOpened())
+                    {
+                        cout << "Impossible to write file: " << filename << endl;
+                    }
+                    sizeChosen = true;
+                }
+                /*   if (!prevFrame.empty()) {
+                      BallTracker::trackBall(prevFrame, mask3d, flow, disOpticalFlow, elaboratedFrame, balls);
+                   }*/
+                imshow("Minimap", miniMap);
+                waitKey();
+                //outputVideo.write(miniMap);
+                prevFrame = mask3d.clone();
+                countFrame++;
+            }
+            cout << "Finished writing" << endl;
             filenametest = path + filenametest + "/";
             //TEST
             //FRAME FIRST
