@@ -9,7 +9,12 @@
 * Function that elaborates video given filename
 * 
 */
-void VideoHelpers::processVideo(VideoCapture capture, int game, int clip) {
+void VideoHelpers::processVideo(string filename) {
+    //TO READ VIDEO
+    VideoCapture capture("test/" + filename + "/" + filename + ".mp4");
+    if (!capture.isOpened())
+        throw "Error in opening video";
+
     //TO WRITE VIDEO
     VideoWriter outputVideo;
 
@@ -28,8 +33,7 @@ void VideoHelpers::processVideo(VideoCapture capture, int game, int clip) {
             elaboratedFrame = frame.clone();
             tie(balls, segmentMask, mask3d, miniMap) = FrameProcessing::processFrame(elaboratedFrame);
             if (!sizeChosen) {
-                std::string filename = "game" + to_string(game) + "_clip" + to_string(clip) + ".avi";
-                outputVideo.open(filename, VideoWriter::fourcc('M', 'J', 'P', 'G'), capture.get(CAP_PROP_FPS), Size(miniMap.cols, miniMap.rows), true);
+                outputVideo.open(filename + ".avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), capture.get(CAP_PROP_FPS), Size(miniMap.cols, miniMap.rows), true);
                 if (!outputVideo.isOpened())
                 {
                     cout << "Impossible to write file: " << filename << endl;
