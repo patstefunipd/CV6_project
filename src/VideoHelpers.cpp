@@ -2,19 +2,14 @@
 #include "FrameProcessing.h"
 #include <opencv2/video/tracking.hpp>
 #include "BallTracker.h"
-
+//PATRIZIA STEFANI
 
 /*
 * 
 * Function that elaborates video given filename
 * 
 */
-void VideoHelpers::processVideo(string filename) {
-    //TO READ VIDEO
-    VideoCapture capture("test/" + filename + "/" + filename + ".mp4");
-    if (!capture.isOpened())
-        throw "Error in opening video";
-
+void VideoHelpers::processVideo(VideoCapture capture, int game, int clip) {
     //TO WRITE VIDEO
     VideoWriter outputVideo;
 
@@ -33,7 +28,8 @@ void VideoHelpers::processVideo(string filename) {
             elaboratedFrame = frame.clone();
             tie(balls, segmentMask, mask3d, miniMap) = FrameProcessing::processFrame(elaboratedFrame);
             if (!sizeChosen) {
-                outputVideo.open(filename + ".avi", VideoWriter::fourcc('M', 'J', 'P', 'G'), capture.get(CAP_PROP_FPS), Size(miniMap.cols, miniMap.rows), true);
+                std::string filename = "game" + to_string(game) + "_clip" + to_string(clip) + ".avi";
+                outputVideo.open(filename, VideoWriter::fourcc('M', 'J', 'P', 'G'), capture.get(CAP_PROP_FPS), Size(miniMap.cols, miniMap.rows), true);
                 if (!outputVideo.isOpened())
                 {
                     cout << "Impossible to write file: " << filename << endl;
@@ -43,7 +39,9 @@ void VideoHelpers::processVideo(string filename) {
          /*   if (!prevFrame.empty()) {
                BallTracker::trackBall(prevFrame, mask3d, flow, disOpticalFlow, elaboratedFrame, balls);
             }*/
-        outputVideo.write(miniMap);
+            imshow("Minimap", miniMap);
+            waitKey();
+        //outputVideo.write(miniMap);
         prevFrame = mask3d.clone();
         countFrame++;
     }

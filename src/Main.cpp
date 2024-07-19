@@ -6,6 +6,8 @@
 #include "Segmentation.h"
 using namespace cv;
 using namespace std;
+//PATRIZIA STEFANI
+
 
 int main(int argc, char* argv[])
 {
@@ -24,13 +26,17 @@ int main(int argc, char* argv[])
     vector<vector<int>> outputData, testData;
     Mat outputSegMask, testSegMask, mask3d, mask2d;
     Mat testImg = Mat::zeros(Size(5, 5), CV_8UC3);
-    for (int game = 1; game < 4 ; game++) {
-        for (int clip = 1; clip < 4; clip++) {
+    for (int game = 1; game <= 4 ; game++) {
+        for (int clip = 1; clip <= 4; clip++) {
             //PROCESSING PART
             if (empty(testImg) || (game > 1 && clip > 2)) break;
 
             filenametest = "game" + to_string(game) + "_clip" + to_string(clip);
-            VideoHelpers::processVideo(filenametest);
+            //TO READ VIDEO
+            VideoCapture capture("test/" + filenametest + "/" + filenametest + ".mp4");
+            if (!capture.isOpened())
+                throw "Error in opening video";
+            VideoHelpers::processVideo(capture, game, clip);
             filenametest = path + filenametest + "/";
             //TEST
             //FRAME FIRST
@@ -39,7 +45,7 @@ int main(int argc, char* argv[])
             //tie(outputData, outputSegMask, mask3d, mask2d) = FrameProcessing::processFrame(testImg);
             //Testing::computeMeanAvaragePrecision(outputData, testData);
             //testSegMask = imread(filenametest + firstSegMask);
-            //Testing::computeMeanIntersectionOverUnion(testImg, outputSegMask);
+            /*Testing::computeMeanIntersectionOverUnion(testImg, outputSegMask);*/
 
             ////FRAME LAST
             //cout << endl << filenametest << " last" << endl;
